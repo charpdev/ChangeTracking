@@ -1,10 +1,8 @@
 ﻿using Castle.DynamicProxy;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace ChangeTracking
 {
@@ -37,6 +35,7 @@ namespace ChangeTracking
                 if (!Equals(previousValue, newValue))
                 {
                     RaisePropertyChanged(invocation.Proxy, propertyName);
+                    RaisePropertyChanged(invocation.Proxy, "IsChanged");
                 }
                 if (!ReferenceEquals(previousValue, newValue))
                 {
@@ -61,6 +60,11 @@ namespace ChangeTracking
                     break;
                 case "remove_PropertyChanged":
                     PropertyChanged -= (PropertyChangedEventHandler)invocation.Arguments[0];
+                    break;
+                case "AcceptChanges":
+                case "RejectChanges":
+                    invocation.Proceed();
+                    RaisePropertyChanged(invocation.Proxy, "IsChanged");
                     break;
                 default:
                     invocation.Proceed();
